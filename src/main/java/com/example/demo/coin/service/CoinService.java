@@ -64,6 +64,14 @@ public interface CoinService {
 	Coin findByCode(String code);
 	
 	/**
+	 * 更新幣別
+	 * 
+	 * @param code
+	 * @return
+	 */
+	Coin findByCodeQuietly(String code);
+	
+	/**
 	 * 新增幣別
 	 * 
 	 * @param code

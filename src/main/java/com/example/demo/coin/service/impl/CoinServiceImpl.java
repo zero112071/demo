@@ -96,12 +96,12 @@ public class CoinServiceImpl implements CoinService {
 			if (result == null) {
 				throw new Exception("Not Exit");
 			}
-			
+
 			if (result != null) {
 				String bpiString = result.getBpiString();
 				Map<String, CoinInfo> bpi = userType.unmarshal(bpiString, null, null);
 				result.setBpi(bpi);
-				
+
 				// 設置 service 所需時間文字格式
 				SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
 				// 取得回傳格式
@@ -139,7 +139,41 @@ public class CoinServiceImpl implements CoinService {
 				String bpiString = result.getBpiString();
 				Map<String, CoinInfo> bpi = userType.unmarshal(bpiString, null, null);
 				result.setBpi(bpi);
-				
+
+				// 設置 service 所需時間文字格式
+				SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
+				// 取得回傳格式
+				String updated = sdf.format(new Date(result.getUpdatedTime()));
+				// 寫入result
+				result.setUpdated(updated);
+			}
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//
+		return result;
+	}
+
+	/**
+	 * 更新幣別
+	 * 
+	 * @param code
+	 * @return
+	 */
+	@Override
+	public Coin findByCodeQuietly(String code) {
+		Coin result = null;
+		//
+		try {
+			result = coinRepository.findByCode(code);
+
+			if (result != null) {
+				String bpiString = result.getBpiString();
+				Map<String, CoinInfo> bpi = userType.unmarshal(bpiString, null, null);
+				result.setBpi(bpi);
+
 				// 設置 service 所需時間文字格式
 				SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
 				// 取得回傳格式
@@ -293,15 +327,20 @@ public class CoinServiceImpl implements CoinService {
 			CurrentPrice currentPrice = coinClient.read_price();
 			String bpiString = userType.marshal(currentPrice.getBpi(), null);
 
+			String code = currentPrice.getChartName();
+
 			// 設置 service 所需時間文字格式
 			SimpleDateFormat sdf_iso = new SimpleDateFormat(DATE_ISO_PATTERN);
 			// 轉換時間
 			long utc = (sdf_iso.parse(currentPrice.getTime().getUpdatedISO())).getTime();
 
-			// 建立新物件
-			Coin coin = new Coin();
-			coin.setCode(currentPrice.getChartName());
-			coin.setName(currentPrice.getChartName());
+			Coin coin = findByCodeQuietly(code);
+			if (coin == null) {
+				// 建立新物件
+				coin = new Coin();
+			}
+			coin.setCode(code);
+			coin.setName(code);
 			coin.setUpdatedTime(utc);
 			coin.setBpiString(bpiString);
 
